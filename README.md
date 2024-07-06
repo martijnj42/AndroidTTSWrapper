@@ -4,6 +4,9 @@ AndroidTTSWrapper is a wrapper around the Android Text-To-Speech module, designe
 ## Usage
 Match the sdk version of the plugin, in the file: `androidttswraper/build.gradle`, to match your project. Build the `androidttswrapper` and add the .aar bundle to your Android Project. 
 
+### Unity
+[UnityAndroidTTSExample](https://github.com/martijnj42/UnityAndroidTTSExample) shows an example how to use the plugin together with Unity.
+
 ## TODO
 - Add function `getVoiceByName()`, easily get a voice.
 - Add function `setVoiceByName()`, easily set a voice.
