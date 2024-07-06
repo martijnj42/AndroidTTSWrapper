@@ -13,7 +13,19 @@ public class OnResultCallback extends Activity {
     private static final int DATA_CHECK_CODE = 1;
     private static final int DATA_INSTALL_CODE = 2;
     private static final int DATA_CHECK_CODE_AFTER_INSTALL = 3;
-    public static TtsWrapper.onVoiceDataCheckResult onVoiceDataCheckResult;
+    public static OnVoiceDataCheckResult onVoiceDataCheckResult;
+
+    private void endActivity(int resultCode, ArrayList<String> availableVoices, ArrayList<String> unavailableVoices){
+        if (onVoiceDataCheckResult != null){
+            if (resultCode < 0){
+                onVoiceDataCheckResult.onVoiceDataFail();
+            } else {
+                onVoiceDataCheckResult.onVoiceDataPass(this.getApplicationContext(), availableVoices, unavailableVoices);
+            }
+        }
+        onVoiceDataCheckResult = null;
+        finish();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,27 +56,39 @@ public class OnResultCallback extends Activity {
                 // Give up it install attempted failed
                 if (requestCode == DATA_CHECK_CODE_AFTER_INSTALL){
                     Log.e(LOGTAG,"Failed to install Voice Data");
+                    endActivity(-1, null, null);
                     return;
                 }
+
                 // Missing voice data, try to install it
-                Intent installIntent = new Intent();
-                Log.i(LOGTAG,"Created install data Intent");
-                installIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
-                startActivityForResult(installIntent, DATA_INSTALL_CODE);
-                return;
+                try {
+                    Intent installIntent = new Intent();
+                    Log.i(LOGTAG, "Created install data Intent");
+                    installIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+                    startActivityForResult(installIntent, DATA_INSTALL_CODE);
+                    return;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Log.i(LOGTAG,"error: " + e.getLocalizedMessage());
+                }
             }
 
             // On success continue initialisation
             ArrayList<String> availableVoices = data.getStringArrayListExtra(TextToSpeech.Engine.EXTRA_AVAILABLE_VOICES);
             ArrayList<String> unavailableVoices = data.getStringArrayListExtra(TextToSpeech.Engine.EXTRA_UNAVAILABLE_VOICES);
-            onVoiceDataCheckResult.onVoiceDataPass(availableVoices, unavailableVoices);
+            endActivity(0, availableVoices, unavailableVoices);
 
         } else if (requestCode == DATA_INSTALL_CODE) {
             // After attempted download, check engine again
-            Intent newIntent = new Intent();
-            newIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
-            Log.i(LOGTAG,"Created CHECK_DATA Intent after attempted install");
-            startActivityForResult(newIntent, DATA_CHECK_CODE);
+            try {
+                Intent newIntent = new Intent();
+                newIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+                Log.i(LOGTAG, "Created CHECK_DATA Intent after attempted install");
+                startActivityForResult(newIntent, DATA_CHECK_CODE);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.i(LOGTAG,"error: " + e.getLocalizedMessage());
+            }
         }
     }
 }
