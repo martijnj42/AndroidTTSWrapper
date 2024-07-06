@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 
 public final class TtsWrapper{
-    public static final String LOGTAG = "Unity";
+    public static final String LOGTAG = "TtsWrapper";
 
     protected TextToSpeech mTts;
     private boolean isInitialised = false;
